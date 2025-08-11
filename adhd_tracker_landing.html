@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADHD Meeting Tracker Pro - Smart Meeting Notes for ADHD Minds</title>
+    
+    <meta name="description" content="Stop losing track of meetings! Our ADHD-friendly tracker helps you capture everything, prioritize actions, and never miss follow-ups again.">
+    <meta name="keywords" content="ADHD, meeting notes, productivity, action tracker, executive function, focus, organization">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.com/">
+    <meta property="og:title" content="ADHD Meeting Tracker Pro - Smart Meeting Notes">
+    <meta property="og:description" content="Finally, a meeting tracker that works with your ADHD brain, not against it.">
+    <meta property="og:image" content="https://your-domain.com/og-image.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-domain.com/">
+    <meta property="twitter:title" content="ADHD Meeting Tracker Pro">
+    <meta property="twitter:description" content="Smart meeting capture for ADHD minds">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4facfe;
+            --primary-dark: #3b8bfe;
+            --gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-alt: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary: #ff6b6b;
+            --success: #51cf66;
+            --warning: #ffd43b;
+            --text: #2d3748;
+            --text-light: #4a5568;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --shadow: 0 10px 40px rgba(0,0,0,0.1);
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.15);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cta-button {
+            background: var(--gradient);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--gradient-alt);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-text h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero-text .highlight {
+            color: #ffd43b;
+            position: relative;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--white);
+            color: var(--primary);
+            padding: 16px 32px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+        }
+
+        .hero-visual {
+            position: relative;
+        }
+
+        .phone-mockup {
+            width: 300px;
+            height: 600px;
+            background: var(--white);
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            margin: 0 auto;
+            overflow: hidden;
+            transform: rotate(-5deg);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .phone-screen {
+            background: var(--gradient);
+            height: 100%;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .mock-header {
+            background: rgba(255,255,255,0.2);
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .mock-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mock-item {
+            background: rgba(255,255,255,0.9);
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 14px;
+            color: var(--text);
+            animation: slideIn 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .mock-item:nth-child(1) { animation-delay: 1s; }
+        .mock-item:nth-child(2) { animation-delay: 1.2s; }
+        .mock-item:nth-child(3) { animation-delay: 1.4s; }
+        .mock-item:nth-child(4) { animation-delay: 1.6s; }
+
+        /* Features Section */
+        .features {
+            padding: 8rem 0;
+            background: var(--white);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* Problem/Solution Section */
+        .problem-solution {
+            padding: 8rem 0;
+            background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+        }
+
+        .ps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .problem-side {
+            padding: 3rem;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--secondary);
+        }
+
+        .solution-side {
+            padding: 3rem;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--success);
+        }
+
+        .ps-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .problem-side .ps-title { color: var(--secondary); }
+        .solution-side .ps-title { color: var(--success); }
+
+        .ps-list {
+            list-style: none;
+            space-y: 1rem;
+        }
+
+        .ps-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f3f4;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .ps-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 8rem 0;
+            background: var(--white);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .testimonial {
+            background: var(--bg);
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            position: relative;
+        }
+
+        .testimonial::before {
+            content: '"';
+            font-size: 4rem;
+            color: var(--primary);
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+            opacity: 0.3;
+        }
+
+        .testimonial-content {
+            font-style: italic;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: var(--text-light);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .author-info h4 {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .author-info p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 8rem 0;
+            background: var(--gradient);
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-section h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-section p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--primary);
+            padding: 16px 32px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-white:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            background: #1a202c;
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            line-height: 1.8;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-20px) rotate(-5deg); }
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .mock-item {
+            transform: translateX(-20px);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+            }
+
+            .hero-visual {
+                order: -1;
+            }
+
+            .phone-mockup {
+                width: 250px;
+                height: 500px;
+            }
+
+            .ps-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus states */
+        .cta-button:focus,
+        .btn-primary:focus,
+        .btn-secondary:focus {
+            outline: 3px solid rgba(79, 172, 254, 0.5);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">🧠 ADHD Tracker Pro</div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#testimonials">Success Stories</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+            <a href="#get-started" class="cta-button">Try Free Now</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Finally, Meeting Notes That <span class="highlight">Work With</span> Your ADHD Brain</h1>
+                    <p>Stop losing track of action items and important decisions. Our smart tracker captures everything, prioritizes automatically, and helps you follow through.</p>
+                    <div class="hero-buttons">
+                        <a href="#demo" class="btn-primary">
+                            🚀 Try Free Demo
+                        </a>
+                        <a href="#video" class="btn-secondary">
+                            ▶️ Watch 2-Min Video
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="mock-header">
+                                🎯 Client Strategy Meeting
+                            </div>
+                            <div class="mock-content">
+                                <div class="mock-item">✅ Review quarterly goals</div>
+                                <div class="mock-item">🚨 Follow up with Sarah by EOD</div>
+                                <div class="mock-item">📅 Schedule Q4 planning session</div>
+                                <div class="mock-item">💡 Research competitor analysis</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem/Solution Section -->
+    <section class="problem-solution">
+        <div class="container">
+            <div class="ps-grid">
+                <div class="problem-side">
+                    <h2 class="ps-title">😤 Sound Familiar?</h2>
+                    <ul class="ps-list">
+                        <li>
+                            <span>😵</span>
+                            <span>You leave meetings feeling overwhelmed and can't remember what you committed to</span>
+                        </li>
+                        <li>
+                            <span>📝</span>
+                            <span>Your meeting notes are scattered, messy, and impossible to find later</span>
+                        </li>
+                        <li>
+                            <span>⏰</span>
+                            <span>You miss follow-ups because action items get lost in the chaos</span>
+                        </li>
+                        <li>
+                            <span>🔥</span>
+                            <span>Important decisions slip through the cracks, causing embarrassment and stress</span>
+                        </li>
+                        <li>
+                            <span>😰</span>
+                            <span>You spend mental energy trying to organize instead of focusing on the conversation</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="solution-side">
+                    <h2 class="ps-title">✨ Now Imagine This...</h2>
+                    <ul class="ps-list">
+                        <li>
+                            <span>🎯</span>
+                            <span>Walk out of every meeting with crystal-clear action items, automatically prioritized</span>
+                        </li>
+                        <li>
+                            <span>🧠</span>
+                            <span>Capture thoughts instantly with our "brain dump" zone - no more lost ideas</span>
+                        </li>
+                        <li>
+                            <span>⚡</span>
+                            <span>Smart templates that adapt to different meeting types (standups, client calls, planning)</span>
+                        </li>
+                        <li>
+                            <span>📊</span>
+                            <span>Visual progress tracking keeps you motivated and accountable</span>
+                        </li>
+                        <li>
+                            <span>🔄</span>
+                            <span>Seamless follow-up system that actually helps you get things done</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Built for ADHD Minds, By ADHD Minds</h2>
+                <p>Every feature is designed to work with your brain's natural patterns, not against them.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🧠</span>
+                    <h3>Brain Dump Zone</h3>
+                    <p>Capture every thought instantly without worrying about organization. Our smart system helps you sort it out later.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🎯</span>
+                    <h3>Smart Prioritization</h3>
+                    <p>Visual priority system with color coding and drag-and-drop organization. See what matters most at a glance.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3>Quick Templates</h3>
+                    <p>Pre-loaded templates for common meeting types. Get started in seconds with structured frameworks.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3>Progress Tracking</h3>
+                    <p>Visual progress bars and completion rates keep you motivated and show how much you've accomplished.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🔄</span>
+                    <h3>Follow-up System</h3>
+                    <p>Never lose track of who owes what to whom. Built-in accountability for yourself and others.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📱</span>
+                    <h3>Works Everywhere</h3>
+                    <p>Mobile-optimized, works offline, and syncs across all your devices. Access your notes anywhere.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>Real People, Real Results</h2>
+                <p>See how ADHD professionals are transforming their meeting experience</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        For the first time in my career, I actually follow through on meeting commitments. The visual priorities and brain dump feature are game-changers for my ADHD brain.
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">S</div>
+                        <div class="author-info">
+                            <h4>Sarah M.</h4>
+                            <p>Product Manager</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        I used to leave 1-on-1s feeling scattered and overwhelmed. Now I have clear action items and my manager notices the difference in my follow-through.
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">M</div>
+                        <div class="author-info">
+                            <h4>Marcus T.</h4>
+                            <p>Software Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        The templates save me so much mental energy. I can focus on the conversation instead of trying to figure out how to organize my notes.
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">A</div>
+                        <div class="author-info">
+                            <h4>Alex R.</h4>
+                            <p>Marketing Director</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="get-started">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Transform Your Meetings?</h2>
+                <p>Join thousands of ADHD professionals who've finally found a meeting system that actually works. Try it free for 14 days - no credit card required.</p>
+                <div class="cta-buttons">
+                    <a href="#" class="btn-white" onclick="openTracker()">🚀 Start Free Trial</a>
+                    <a href="#" class="btn-outline">📧 Get Weekly Tips</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🧠 ADHD Tracker Pro</h3>
+                    <p>Making meetings work for ADHD minds. Built with empathy, designed for success.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Product</h3>
+                    <p><a href="#">Features</a></p>
+                    <p><a href="#">Templates</a></p>
+                    <p><a href="#">Pricing</a></p>
+                    <p><a href="#">Mobile App</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <p><a href="#">Help Center</a></p>
+                    <p><a href="#">ADHD Resources</a></p>
+                    <p><a href="#">Community</a></p>
+                    <p><a href="#">Contact Us</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <p><a href="#">About</a></p>
+                    <p><a href="#">Blog</a></p>
+                    <p><a href="#">Privacy</a></p>
+                    <p><a href="#">Terms</a></p>
+                </div>
+            </div>
+            
