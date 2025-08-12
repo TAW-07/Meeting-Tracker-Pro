@@ -1,0 +1,2558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <title>ADHD Meeting Brain Dump & Action Tracker Pro</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#4facfe">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ADHD Tracker">
+    <meta name="application-name" content="ADHD Meeting Tracker">
+    <meta name="description" content="Smart meeting tracker designed for ADHD minds - capture thoughts, prioritize actions, stay focused">
+    
+    <!-- PWA Icons -->
+    <link rel="manifest" href="data:application/json,{
+        'name': 'ADHD Meeting Tracker Pro',
+        'short_name': 'ADHD Tracker',
+        'description': 'Smart meeting tracker for ADHD minds',
+        'start_url': '/',
+        'display': 'standalone',
+        'background_color': '#ffffff',
+        'theme_color': '#4facfe',
+        'orientation': 'portrait',
+        'icons': [
+            {
+                'src': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iOTYiIGN5PSI5NiIgcj0iOTYiIGZpbGw9IiM0ZmFjZmUiLz48dGV4dCB4PSI5NiIgeT0iMTEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSI4MCI+8J+ngDwvdGV4dD48L3N2Zz4=',
+                'sizes': '192x192',
+                'type': 'image/svg+xml'
+            }
+        ]
+    }">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #4facfe;
+            --primary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --secondary-color: #667eea;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #6c757d;
+            --text-color: #333;
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.15);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .error-boundary {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin: 10px 0;
+            color: #721c24;
+            display: none;
+        }
+
+        .error-boundary.show {
+            display: block;
+        }
+
+        .retry-button {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #fff;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 0;
+            padding-bottom: 100px; /* Space for floating actions */
+        }
+
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid var(--medium-gray);
+            position: relative;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-icon {
+            font-size: 1.3rem;
+            margin-right: 8px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            font-weight: 600;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group.small {
+            flex: 0.3;
+            min-width: 120px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], 
+        input[type="date"], 
+        input[type="time"], 
+        textarea, 
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px; /* Prevents zoom on iOS */
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        input:focus, 
+        textarea:focus, 
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .brain-dump textarea {
+            min-height: 120px;
+        }
+
+        .template-card {
+            background: var(--light-gray);
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .template-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .template-card.selected {
+            border-color: var(--primary-color);
+            background: rgba(79, 172, 254, 0.1);
+        }
+
+        .template-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .template-description {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+        }
+
+        .template-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .template-tag {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            touch-action: manipulation;
+        }
+
+        .checkbox-item:hover {
+            background: var(--medium-gray);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+
+        .checkbox-item.checked {
+            background: #d4edda;
+            border-color: var(--success-color);
+        }
+
+        .rating-scale {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .rating-button {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: var(--transition);
+            touch-action: manipulation;
+            font-size: 14px;
+        }
+
+        .rating-button:hover {
+            border-color: var(--primary-color);
+            background: rgba(79, 172, 254, 0.1);
+        }
+
+        .rating-button.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .task-item {
+            background: white;
+            border: 2px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .task-item:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: var(--dark-gray);
+            font-size: 16px;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            touch-action: manipulation;
+        }
+
+        .checkbox.checked {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .checkbox-label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .checkbox-label.completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .delete-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: var(--transition);
+            touch-action: manipulation;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .priority-selector {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0;
+            align-items: center;
+        }
+
+        .priority-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            touch-action: manipulation;
+        }
+
+        .priority-dot.high { background: var(--danger-color); }
+        .priority-dot.medium { background: var(--warning-color); }
+        .priority-dot.low { background: var(--success-color); }
+        .priority-dot.none { background: var(--medium-gray); }
+
+        .priority-dot.selected {
+            border-color: #333;
+            transform: scale(1.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .priority-high {
+            border-left: 5px solid var(--danger-color) !important;
+            background-color: rgba(220, 53, 69, 0.05);
+        }
+
+        .priority-medium {
+            border-left: 5px solid var(--warning-color) !important;
+            background-color: rgba(255, 193, 7, 0.05);
+        }
+
+        .priority-low {
+            border-left: 5px solid var(--success-color) !important;
+            background-color: rgba(40, 167, 69, 0.05);
+        }
+
+        .notes-area {
+            min-height: 100px;
+            padding: 15px;
+            border: 2px dashed var(--medium-gray);
+            border-radius: var(--border-radius);
+            cursor: text;
+            transition: var(--transition);
+            position: relative;
+            font-size: 16px;
+        }
+
+        .notes-area:hover {
+            border-color: var(--primary-color);
+        }
+
+        .notes-area[contenteditable="true"] {
+            border-style: solid;
+            border-color: var(--primary-color);
+        }
+
+        .notes-area.placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .word-counter {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 12px;
+            color: var(--dark-gray);
+            background: rgba(255,255,255,0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .add-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 14px;
+            touch-action: manipulation;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .floating-actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        .fab:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .fab.save { background: var(--success-color); }
+        .fab.focus { background: #6f42c1; }
+        .fab.export { background: #e91e63; }
+        .fab.mindmap { background: #ff5722; }
+
+        .fab-tooltip {
+            position: absolute;
+            right: 65px;
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1001;
+        }
+
+        .fab:hover .fab-tooltip {
+            opacity: 1;
+        }
+
+        .timer-display {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 1000;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .timer-display.warning {
+            background: var(--warning-color);
+            color: #333;
+        }
+
+        .timer-display.danger {
+            background: var(--danger-color);
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .save-indicator {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1001;
+            font-size: 14px;
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+        }
+
+        .feature-highlight {
+            background: linear-gradient(45deg, #fff3cd, #f8d7da);
+            border-left: 4px solid var(--warning-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            font-size: 0.9rem;
+        }
+
+        .offline-indicator {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--warning-color);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1001;
+            display: none;
+        }
+
+        .offline-indicator.show {
+            display: block;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            margin: 5px;
+            font-size: 14px;
+            touch-action: manipulation;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--dark-gray);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .form-group.small {
+                min-width: 100%;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .rating-scale {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .rating-button {
+                width: 35px;
+                height: 35px;
+                font-size: 12px;
+            }
+            
+            .timer-display {
+                position: static;
+                transform: none;
+                margin: 10px auto;
+                display: block;
+                text-align: center;
+                width: fit-content;
+            }
+            
+            .floating-actions {
+                bottom: 10px;
+                right: 10px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+            
+            .fab {
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+            
+            .fab-tooltip {
+                display: none; /* Hide tooltips on mobile */
+            }
+            
+            .priority-selector {
+                justify-content: center;
+            }
+            
+            .template-tags {
+                justify-content: center;
+            }
+
+            .modal {
+                padding: 10px;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .section h2 {
+                font-size: 1.1rem;
+            }
+            
+            .fab {
+                width: 44px;
+                height: 44px;
+                font-size: 16px;
+            }
+            
+            .add-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+
+        /* PWA Install Button */
+        .install-prompt {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: var(--border-radius);
+            margin: 15px;
+            display: none;
+        }
+
+        .install-prompt.show {
+            display: block;
+        }
+
+        .install-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .install-btn:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Error Boundary -->
+    <div class="error-boundary" id="errorBoundary">
+        <h3>⚠️ Something went wrong</h3>
+        <p id="errorMessage">An error occurred. Don't worry - your data is safe!</p>
+        <button class="retry-button" onclick="handleError('retry')">Try Again</button>
+        <button class="retry-button" onclick="handleError('refresh')">Refresh Page</button>
+    </div>
+
+    <!-- PWA Install Prompt -->
+    <div class="install-prompt" id="installPrompt">
+        <h3>📱 Install ADHD Tracker</h3>
+        <p>Install this app on your device for quick access and offline use!</p>
+        <button class="install-btn" id="installBtn">Install App</button>
+        <button class="install-btn" onclick="dismissInstallPrompt()">Maybe Later</button>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div class="offline-indicator" id="offlineIndicator">
+        📡 Working offline - data will sync when reconnected
+    </div>
+
+    <!-- Save Indicator -->
+    <div class="save-indicator" id="saveIndicator">✓ Auto-saved</div>
+    
+    <!-- Timer Display -->
+    <div class="timer-display" id="timerWidget" onclick="toggleTimer()">
+        <span>⏱️</span>
+        <span id="timerDisplay">00:00</span>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Meeting Brain Dump & Action Tracker Pro</h1>
+            <p class="subtitle">Smart capture for ADHD minds</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0% Complete</div>
+        </div>
+
+        <div class="content">
+            <!-- Smart Templates Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <h2>Smart Templates</h2>
+                </div>
+                <div class="feature-highlight">
+                    <strong>✨ New:</strong> AI-powered templates with pre-filled content to get you started in seconds!
+                </div>
+                
+                <!-- Template Cards -->
+                <div id="templateContainer">
+                    <div class="template-card" data-template="daily-standup" onclick="loadSmartTemplate(this)">
+                        <div class="template-title">🎯 Daily Standup</div>
+                        <div class="template-description">Team sync with yesterday/today/blockers format</div>
+                        <div class="template-tags">
+                            <span class="template-tag">15 min</span>
+                            <span class="template-tag">Team</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-template="client-presentation" onclick="loadSmartTemplate(this)">
+                        <div class="template-title">📊 Client Presentation</div>
+                        <div class="template-description">Progress review, feedback, and next steps</div>
+                        <div class="template-tags">
+                            <span class="template-tag">45 min</span>
+                            <span class="template-tag">Client</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-template="brainstorm-session" onclick="loadSmartTemplate(this)">
+                        <div class="template-title">💡 Brainstorm Session</div>
+                        <div class="template-description">Creative ideation with structured capture</div>
+                        <div class="template-tags">
+                            <span class="template-tag">60 min</span>
+                            <span class="template-tag">Creative</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-template="one-on-one" onclick="loadSmartTemplate(this)">
+                        <div class="template-title">👤 1-on-1 Meeting</div>
+                        <div class="template-description">Career development and feedback session</div>
+                        <div class="template-tags">
+                            <span class="template-tag">30 min</span>
+                            <span class="template-tag">Personal</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-template="project-planning" onclick="loadSmartTemplate(this)">
+                        <div class="template-title">📋 Project Planning</div>
+                        <div class="template-description">Scope, timeline, and resource planning</div>
+                        <div class="template-tags">
+                            <span class="template-tag">90 min</span>
+                            <span class="template-tag">Planning</span>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card" data-template="blank" onclick="loadSmartTemplate(this)">
+                        <div class="template-title">📝 Blank Canvas</div>
+                        <div class="template-description">Start from scratch with empty template</div>
+                        <div class="template-tags">
+                            <span class="template-tag">Custom</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-Meeting Setup -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <h2>Meeting Setup</h2>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Meeting Title:</label>
+                        <input type="text" id="meetingTitle" placeholder="What's this meeting about?" oninput="autoSave(); updateProgress()" autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Meeting Date:</label>
+                        <input type="date" id="meetingDate" oninput="autoSave(); updateProgress()">
+                    </div>
+                    <div class="form-group">
+                        <label>Time:</label>
+                        <input type="time" id="meetingTime" oninput="autoSave(); updateProgress()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Meeting Purpose:</label>
+                    <div style="position: relative;">
+                        <textarea id="meetingPurpose" placeholder="What are we trying to accomplish?" oninput="autoSave(); updateProgress(); updateWordCount(this, 'wordCount1')"></textarea>
+                        <div class="word-counter" id="wordCount1">0 words</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>My Energy Level:</label>
+                    <div class="rating-scale">
+                        <span>😴</span>
+                        <div class="rating-buttons" id="energyRating">
+                            <div class="rating-button" onclick="selectRating('energy', this, 1)">1</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 2)">2</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 3)">3</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 4)">4</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 5)">5</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 6)">6</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 7)">7</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 8)">8</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 9)">9</div>
+                            <div class="rating-button" onclick="selectRating('energy', this, 10)">10</div>
+                        </div>
+                        <span>⚡</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brain Dump Zone -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🧠</span>
+                    <h2>Brain Dump Zone</h2>
+                </div>
+                <p style="margin-bottom: 15px; color: var(--dark-gray); font-size: 0.9rem;">No filtering! Capture everything during the meeting.</p>
+                
+                <div class="priority-selector">
+                    <label style="font-size: 14px; margin-right: 10px;">Section Priority:</label>
+                    <div class="priority-dot none selected" onclick="setSectionPriority(this, 'none')" title="No Priority"></div>
+                    <div class="priority-dot low" onclick="setSectionPriority(this, 'low')" title="Low Priority"></div>
+                    <div class="priority-dot medium" onclick="setSectionPriority(this, 'medium')" title="Medium Priority"></div>
+                    <div class="priority-dot high" onclick="setSectionPriority(this, 'high')" title="High Priority"></div>
+                </div>
+                
+                <div class="notes-area placeholder" id="brainDump" onclick="startEditing(this)" oninput="updateWordCount(this, 'wordCount2'); updateProgress(); autoSave()">
+                    Click here to dump all thoughts, ideas, and random notes during the meeting...
+                </div>
+                <div class="word-counter" id="wordCount2">0 words</div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">⚡</span>
+                    <h2>Quick Actions</h2>
+                </div>
+                <div id="quick-actions">
+                    <!-- Actions will be added here -->
+                </div>
+                <button class="add-btn" onclick="addQuickAction()">+ Add Quick Action</button>
+            </div>
+
+            <!-- Key Decisions -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <h2>Key Decisions & Outcomes</h2>
+                </div>
+                <div class="form-group">
+                    <label>What was decided?</label>
+                    <div style="position: relative;">
+                        <textarea id="keyDecisions" placeholder="Capture key decisions and outcomes" oninput="updateWordCount(this, 'wordCount3'); autoSave(); updateProgress()"></textarea>
+                        <div class="word-counter" id="wordCount3">0 words</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>My top 3 commitments (be realistic!):</label>
+                    <div style="position: relative;">
+                        <textarea id="commitments" placeholder="Only list what you can actually accomplish" oninput="updateWordCount(this, 'wordCount4'); autoSave(); updateProgress()"></textarea>
+                        <div class="word-counter" id="wordCount4">0 words</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Items -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">✅</span>
+                    <h2>Action Items</h2>
+                </div>
+                
+                <h3>🚨 Do Today</h3>
+                <div id="urgent-items">
+                    <!-- Urgent items will be added here -->
+                </div>
+                <button class="add-btn" onclick="addUrgentItem()">🚨 Add Urgent Item</button>
+                
+                <h3>⭐ This Week</h3>
+                <div id="weekly-items">
+                    <!-- Weekly items will be added here -->
+                </div>
+                <button class="add-btn" onclick="addWeeklyItem()">⭐ Add Weekly Item</button>
+                
+                <h3>📅 Future Actions</h3>
+                <div id="future-items">
+                    <!-- Future items will be added here -->
+                </div>
+                <button class="add-btn" onclick="addFutureItem()">📅 Add Future Item</button>
+            </div>
+
+            <!-- People & Follow-up -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">👥</span>
+                    <h2>People & Follow-up</h2>
+                </div>
+                
+                <h3>Who needs what from me?</h3>
+                <div id="people-needs">
+                    <!-- People needs will be added here -->
+                </div>
+                
+                <h3>Who owes me what?</h3>
+                <div id="people-owes">
+                    <!-- People owes will be added here -->
+                </div>
+                
+                <button class="add-btn" onclick="addPersonTracking()">👥 Add Person</button>
+            </div>
+
+            <!-- Meeting Reflection -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <h2>Meeting Reflection</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label>How effective was this meeting?</label>
+                    <div class="rating-scale">
+                        <span>😞</span>
+                        <div class="rating-buttons" id="effectivenessRating">
+                            <div class="rating-button" onclick="selectRating('effectiveness', this, 1)">1</div>
+                            <div class="rating-button" onclick="selectRating('effectiveness', this, 2)">2</div>
+                            <div class="rating-button" onclick="selectRating('effectiveness', this, 3)">3</div>
+                            <div class="rating-button" onclick="selectRating('effectiveness', this, 4)">4</div>
+                            <div class="rating-button" onclick="selectRating('effectiveness', this, 5)">5</div>
+                        </div>
+                        <span>🎉</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>What made it valuable (or not)?</label>
+                    <div style="position: relative;">
+                        <textarea id="valueReflection" placeholder="Reflect on what worked well or what didn't" oninput="updateWordCount(this, 'wordCount5'); autoSave()"></textarea>
+                        <div class="word-counter" id="wordCount5">0 words</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📝</span>
+                    <h2>Additional Notes</h2>
+                </div>
+                <div class="notes-area placeholder" id="additionalNotes" onclick="startEditing(this)" oninput="updateProgress(); autoSave(); updateWordCount(this, 'wordCount6')">
+                    Add any additional notes, random thoughts, or important details...
+                </div>
+                <div class="word-counter" id="wordCount6">0 words</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <h2>📤 Export & Share</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 20px 0;">
+                <button class="btn btn-primary" onclick="exportData('text')">📄 Text</button>
+                <button class="btn btn-primary" onclick="exportData('email')">📧 Email</button>
+                <button class="btn btn-primary" onclick="exportData('json')">⚙️ JSON</button>
+                <button class="btn btn-primary" onclick="printData()">🖨️ Print</button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeModal('exportModal')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Focus Modal -->
+    <div class="modal" id="focusModal">
+        <div class="modal-content" style="text-align: center;">
+            <h2>🎯 Focus Mode</h2>
+            <p>Choose your focus session:</p>
+            <div id="focusTimer" style="font-size: 3rem; margin: 20px 0; color: var(--primary-color); font-weight: bold;">25:00</div>
+            <div style="margin: 20px 0;">
+                <button class="btn btn-primary" onclick="startFocusSession(25)">25 min Pomodoro</button>
+                <button class="btn btn-primary" onclick="startFocusSession(15)">15 min Quick</button>
+                <button class="btn btn-primary" onclick="startFocusSession(5)">5 min Break</button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeModal('focusModal')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Floating Action Buttons -->
+    <div class="floating-actions">
+        <button class="fab save" onclick="manualSave()">
+            💾
+            <div class="fab-tooltip">Save Progress</div>
+        </button>
+        <button class="fab focus" onclick="openModal('focusModal')">
+            🎯
+            <div class="fab-tooltip">Focus Mode</div>
+        </button>
+        <button class="fab export" onclick="openModal('exportModal')">
+            📤
+            <div class="fab-tooltip">Export & Share</div>
+        </button>
+        <button class="fab" onclick="clearAll()">
+            🗑️
+            <div class="fab-tooltip">Start Fresh</div>
+        </button>
+    </div>
+
+    <script>
+        // Global variables and state management
+        let appState = {
+            meetingData: {},
+            timerSeconds: 0,
+            timerRunning: false,
+            focusSeconds: 0,
+            focusRunning: false,
+            isOnline: navigator.onLine,
+            hasUnsavedChanges: false,
+            currentTemplate: null,
+            autoSaveInterval: null,
+            timerInterval: null,
+            focusTimerInterval: null
+        };
+
+        // Smart Templates with pre-filled content
+        const smartTemplates = {
+            'daily-standup': {
+                title: 'Daily Standup - Team Sync',
+                purpose: 'Share progress updates, identify blockers, and align on today\'s priorities',
+                prefilledContent: {
+                    brainDump: 'Yesterday accomplishments:\n• \n\nToday\'s plan:\n• \n\nBlockers/needs help:\n• \n\nTeam updates:\n• ',
+                    quickActions: [
+                        'Update project status',
+                        'Address blockers',
+                        'Schedule follow-up meetings'
+                    ],
+                    commitments: '1. Complete [specific task] by EOD\n2. Follow up with [person] about [topic]\n3. Update team on [progress/status]'
+                },
+                duration: '15 min',
+                tips: 'Keep updates concise - focus on what affects the team'
+            },
+            'client-presentation': {
+                title: 'Client Presentation - Progress Review',
+                purpose: 'Present completed work, gather client feedback, and align on next steps',
+                prefilledContent: {
+                    brainDump: 'Agenda:\n1. Progress overview\n2. Demo/presentation\n3. Client feedback\n4. Next steps discussion\n\nKey points to cover:\n• \n\nClient concerns/questions:\n• ',
+                    quickActions: [
+                        'Present deliverables',
+                        'Document client feedback',
+                        'Confirm timeline',
+                        'Schedule next check-in'
+                    ],
+                    keyDecisions: 'Client approved: \n\nChanges requested: \n\nNew requirements: ',
+                    commitments: '1. Implement agreed changes by [date]\n2. Send meeting summary within 24hrs\n3. Schedule next milestone review'
+                },
+                duration: '45 min',
+                tips: 'Have backup plans ready - clients often change direction!'
+            },
+            'brainstorm-session': {
+                title: 'Brainstorming Session - Creative Problem Solving',
+                purpose: 'Generate innovative solutions and explore creative approaches to current challenges',
+                prefilledContent: {
+                    brainDump: 'Problem statement:\n\n\nIdeas generated:\n• \n• \n• \n\nBest concepts:\n• \n\nCrazy ideas (might work!):\n• ',
+                    quickActions: [
+                        'Capture all ideas (no judgment)',
+                        'Group similar concepts',
+                        'Vote on top 3 ideas',
+                        'Plan prototype/test'
+                    ],
+                    keyDecisions: 'Top ideas to explore:\n1. \n2. \n3. \n\nNext steps for each:',
+                    commitments: '1. Research feasibility of [top idea]\n2. Create rough prototype/mockup\n3. Present findings to team next week'
+                },
+                duration: '60 min',
+                tips: 'Wild ideas welcome! Build on others\' thoughts. Quantity over quality initially.'
+            },
+            'one-on-one': {
+                title: '1-on-1 Meeting - Personal Check-in',
+                purpose: 'Career development discussion, feedback exchange, and relationship building',
+                prefilledContent: {
+                    brainDump: 'Recent wins:\n• \n\nChallenges faced:\n• \n\nCareer goals discussed:\n• \n\nFeedback given/received:\n• ',
+                    quickActions: [
+                        'Review recent achievements',
+                        'Discuss current challenges',
+                        'Set development goals',
+                        'Plan skill building'
+                    ],
+                    keyDecisions: 'Development priorities:\n\nSupport needed:\n\nGoals for next period:',
+                    commitments: '1. Work on [specific skill/area]\n2. Read/complete [learning resource]\n3. Practice [new responsibility/task]'
+                },
+                duration: '30 min',
+                tips: 'Be honest about challenges. Focus on growth, not just status updates.'
+            },
+            'project-planning': {
+                title: 'Project Planning - Scope & Strategy',
+                purpose: 'Define project scope, timeline, resources, and success criteria',
+                prefilledContent: {
+                    brainDump: 'Project goals:\n\n\nScope (what\'s included):\n• \n\nScope (what\'s NOT included):\n• \n\nKey milestones:\n• \n\nRisks/concerns:\n• ',
+                    quickActions: [
+                        'Define clear scope',
+                        'Identify key stakeholders',
+                        'Set realistic timeline',
+                        'Plan resource allocation'
+                    ],
+                    keyDecisions: 'Project scope: \n\nTimeline: \n\nBudget/resources: \n\nSuccess metrics:',
+                    commitments: '1. Create detailed project plan\n2. Get stakeholder sign-off\n3. Set up project tracking system'
+                },
+                duration: '90 min',
+                tips: 'Be realistic with timelines. Plan for the unexpected. Get alignment early.'
+            }
+        };
+
+        // Error handling system
+        function handleError(action, error = null) {
+            try {
+                const errorBoundary = document.getElementById('errorBoundary');
+                const errorMessage = document.getElementById('errorMessage');
+                
+                if (action === 'show') {
+                    errorMessage.textContent = error?.message || 'An unexpected error occurred. Your data is safe!';
+                    errorBoundary.classList.add('show');
+                    console.error('App Error:', error);
+                } else if (action === 'hide') {
+                    errorBoundary.classList.remove('show');
+                } else if (action === 'retry') {
+                    handleError('hide');
+                    // Retry the last operation
+                    autoSave();
+                } else if (action === 'refresh') {
+                    if (confirm('This will refresh the page. Any unsaved changes will be lost. Continue?')) {
+                        window.location.reload();
+                    }
+                }
+            } catch (e) {
+                console.error('Error handler failed:', e);
+                alert('A critical error occurred. Please refresh the page.');
+            }
+        }
+
+        // Wrap functions in error handling
+        function safeExecute(fn, context = 'operation') {
+            try {
+                return fn();
+            } catch (error) {
+                console.error(`Error in ${context}:`, error);
+                handleError('show', error);
+                return null;
+            }
+        }
+
+        // PWA functionality
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallPrompt();
+        });
+
+        function showInstallPrompt() {
+            const installPrompt = document.getElementById('installPrompt');
+            const installBtn = document.getElementById('installBtn');
+            
+            if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+                installPrompt.classList.add('show');
+                
+                installBtn.onclick = async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const result = await deferredPrompt.userChoice;
+                        if (result.outcome === 'accepted') {
+                            console.log('User accepted PWA install');
+                        }
+                        deferredPrompt = null;
+                        dismissInstallPrompt();
+                    }
+                };
+            }
+        }
+
+        function dismissInstallPrompt() {
+            document.getElementById('installPrompt').classList.remove('show');
+        }
+
+        // Online/Offline detection
+        window.addEventListener('online', () => {
+            appState.isOnline = true;
+            document.getElementById('offlineIndicator').classList.remove('show');
+            // Sync any pending changes
+            if (appState.hasUnsavedChanges) {
+                autoSave();
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            appState.isOnline = false;
+            document.getElementById('offlineIndicator').classList.add('show');
+        });
+
+        // Smart Template System
+        function loadSmartTemplate(templateCard) {
+            safeExecute(() => {
+                // Remove previous selection
+                document.querySelectorAll('.template-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // Select current template
+                templateCard.classList.add('selected');
+                
+                const templateType = templateCard.dataset.template;
+                appState.currentTemplate = templateType;
+                
+                if (templateType === 'blank') {
+                    clearAllFields();
+                    return;
+                }
+                
+                const template = smartTemplates[templateType];
+                if (!template) return;
+                
+                // Fill in basic info
+                document.getElementById('meetingTitle').value = template.title;
+                document.getElementById('meetingPurpose').value = template.purpose;
+                
+                // Fill pre-filled content
+                if (template.prefilledContent) {
+                    const content = template.prefilledContent;
+                    
+                    if (content.brainDump) {
+                        const brainDumpEl = document.getElementById('brainDump');
+                        brainDumpEl.innerHTML = content.brainDump;
+                        brainDumpEl.classList.remove('placeholder');
+                    }
+                    
+                    if (content.commitments) {
+                        document.getElementById('commitments').value = content.commitments;
+                    }
+                    
+                    if (content.keyDecisions) {
+                        document.getElementById('keyDecisions').value = content.keyDecisions;
+                    }
+                    
+                    // Add quick actions
+                    if (content.quickActions) {
+                        const container = document.getElementById('quick-actions');
+                        container.innerHTML = '';
+                        content.quickActions.forEach(action => {
+                            const item = createTaskItem(action, 'none');
+                            container.appendChild(item);
+                        });
+                    }
+                }
+                
+                // Set today's date
+                setTodaysDate();
+                
+                // Show template tip
+                if (template.tips) {
+                    showNotification(`💡 Tip: ${template.tips}`, 'info');
+                }
+                
+                updateProgress();
+                autoSave();
+                showSaveIndicator();
+                
+                // Scroll to meeting setup
+                document.querySelector('[data-section="meeting-setup"]')?.scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+            }, 'loading template');
+        }
+
+        // Enhanced task creation
+        function createTaskItem(text, priority = 'none', completed = false) {
+            const item = document.createElement('div');
+            item.className = 'task-item';
+            item.draggable = true;
+            item.innerHTML = `
+                <div class="task-header">
+                    <span class="drag-handle">⋮⋮</span>
+                    <div class="checkbox ${completed ? 'checked' : ''}" onclick="toggleCheck(this)"></div>
+                    <div class="checkbox-label ${completed ? 'completed' : ''}" contenteditable="true" oninput="autoSave()">${text}</div>
+                    <button class="delete-btn" onclick="deleteItem(this)">×</button>
+                </div>
+                <div class="priority-selector">
+                    <div class="priority-dot none ${priority === 'none' ? 'selected' : ''}" onclick="setTaskPriority(this, 'none')"></div>
+                    <div class="priority-dot low ${priority === 'low' ? 'selected' : ''}" onclick="setTaskPriority(this, 'low')"></div>
+                    <div class="priority-dot medium ${priority === 'medium' ? 'selected' : ''}" onclick="setTaskPriority(this, 'medium')"></div>
+                    <div class="priority-dot high ${priority === 'high' ? 'selected' : ''}" onclick="setTaskPriority(this, 'high')"></div>
+                </div>
+            `;
+            
+            if (priority !== 'none') {
+                item.classList.add(`priority-${priority}`);
+            }
+            
+            // Add drag and drop event listeners
+            item.addEventListener('dragstart', handleDragStart);
+            
+            return item;
+        }
+
+        // Drag and Drop functionality
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.style.opacity = '0.5';
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            if (draggedElement) {
+                const container = e.currentTarget;
+                const afterElement = getDragAfterElement(container, e.clientY);
+                
+                if (afterElement == null) {
+                    container.appendChild(draggedElement);
+                } else {
+                    container.insertBefore(draggedElement, afterElement);
+                }
+                
+                draggedElement.style.opacity = '';
+                draggedElement = null;
+                autoSave();
+            }
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.task-item:not([style*="opacity: 0.5"])')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Enhanced auto-save system
+        function autoSave() {
+            safeExecute(() => {
+                appState.meetingData = collectAllData();
+                appState.hasUnsavedChanges = true;
+                
+                // In a real app, this would save to localStorage or sync to server
+                // For demo purposes, we'll just log it
+                console.log('Auto-saved:', {
+                    timestamp: new Date().toISOString(),
+                    dataSize: JSON.stringify(appState.meetingData).length,
+                    online: appState.isOnline
+                });
+                
+                // Simulate successful save
+                setTimeout(() => {
+                    appState.hasUnsavedChanges = false;
+                }, 100);
+            }, 'auto-save');
+        }
+
+        function manualSave() {
+            autoSave();
+            showSaveIndicator();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        // Data collection
+        function collectAllData() {
+            return {
+                template: appState.currentTemplate,
+                meetingTitle: document.getElementById('meetingTitle').value,
+                meetingDate: document.getElementById('meetingDate').value,
+                meetingTime: document.getElementById('meetingTime').value,
+                meetingPurpose: document.getElementById('meetingPurpose').value,
+                brainDump: document.getElementById('brainDump').innerText,
+                keyDecisions: document.getElementById('keyDecisions').value,
+                commitments: document.getElementById('commitments').value,
+                valueReflection: document.getElementById('valueReflection').value,
+                additionalNotes: document.getElementById('additionalNotes').innerText,
+                quickActions: collectTaskData('quick-actions'),
+                urgentItems: collectTaskData('urgent-items'),
+                weeklyItems: collectTaskData('weekly-items'),
+                futureItems: collectTaskData('future-items'),
+                peopleNeeds: collectFormData('people-needs'),
+                peopleOwes: collectFormData('people-owes'),
+                energyRating: getSelectedRating('energyRating'),
+                effectivenessRating: getSelectedRating('effectivenessRating'),
+                timestamp: new Date().toISOString(),
+                version: '2.0'
+            };
+        }
+
+        function collectTaskData(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return [];
+            
+            const items = [];
+            const taskItems = container.querySelectorAll('.task-item');
+            taskItems.forEach(item => {
+                const checkbox = item.querySelector('.checkbox');
+                const label = item.querySelector('.checkbox-label');
+                const priorityDot = item.querySelector('.priority-dot.selected');
+                
+                if (label) {
+                    items.push({
+                        text: label.textContent || label.innerText,
+                        completed: checkbox?.classList.contains('checked') || false,
+                        priority: priorityDot?.className.match(/priority-dot (\w+) selected/)?.[1] || 'none'
+                    });
+                }
+            });
+            return items;
+        }
+
+        function collectFormData(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return [];
+            
+            const items = [];
+            const rows = container.querySelectorAll('.form-row');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input, textarea');
+                if (inputs.length > 0) {
+                    const rowData = {};
+                    inputs.forEach((input, index) => {
+                        if (input.value.trim()) {
+                            rowData[`field${index}`] = input.value;
+                        }
+                    });
+                    if (Object.keys(rowData).length > 0) {
+                        items.push(rowData);
+                    }
+                }
+            });
+            return items;
+        }
+
+        function getSelectedRating(containerId) {
+            const container = document.getElementById(containerId);
+            const selected = container?.querySelector('.rating-button.selected');
+            return selected?.textContent || null;
+        }
+
+        // Interactive functions
+        function toggleCheck(checkbox) {
+            safeExecute(() => {
+                checkbox.classList.toggle('checked');
+                const label = checkbox.nextElementSibling;
+                if (label) {
+                    label.classList.toggle('completed');
+                }
+                const item = checkbox.closest('.task-item');
+                if (item) {
+                    item.classList.toggle('completed');
+                }
+                updateProgress();
+                autoSave();
+            }, 'toggle checkbox');
+        }
+
+        function selectRating(groupName, element, rating) {
+            safeExecute(() => {
+                const container = element.closest('.rating-buttons');
+                container.querySelectorAll('.rating-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                updateProgress();
+                autoSave();
+            }, 'select rating');
+        }
+
+        function setSectionPriority(element, priority) {
+            safeExecute(() => {
+                element.parentNode.querySelectorAll('.priority-dot').forEach(dot => {
+                    dot.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                
+                const section = element.closest('.section');
+                section.classList.remove('priority-high', 'priority-medium', 'priority-low');
+                if (priority !== 'none') {
+                    section.classList.add(`priority-${priority}`);
+                }
+                autoSave();
+            }, 'set section priority');
+        }
+
+        function setTaskPriority(element, priority) {
+            safeExecute(() => {
+                element.parentNode.querySelectorAll('.priority-dot').forEach(dot => {
+                    dot.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                
+                const taskItem = element.closest('.task-item');
+                taskItem.classList.remove('priority-high', 'priority-medium', 'priority-low');
+                if (priority !== 'none') {
+                    taskItem.classList.add(`priority-${priority}`);
+                }
+                autoSave();
+            }, 'set task priority');
+        }
+
+        function startEditing(element) {
+            safeExecute(() => {
+                if (element.classList.contains('placeholder')) {
+                    element.innerHTML = '';
+                    element.classList.remove('placeholder');
+                }
+                element.contentEditable = true;
+                element.focus();
+            }, 'start editing');
+        }
+
+        function deleteItem(button) {
+            safeExecute(() => {
+                if (confirm('Delete this item?')) {
+                    const item = button.closest('.task-item, .form-row');
+                    if (item) {
+                        item.remove();
+                        updateProgress();
+                        autoSave();
+                    }
+                }
+            }, 'delete item');
+        }
+
+        // Add item functions
+        function addQuickAction() {
+            safeExecute(() => {
+                const text = prompt('Enter quick action:') || 'New action item';
+                if (text.trim()) {
+                    const container = document.getElementById('quick-actions');
+                    const item = createTaskItem(text.trim());
+                    container.appendChild(item);
+                    autoSave();
+                }
+            }, 'add quick action');
+        }
+
+        function addUrgentItem() {
+            safeExecute(() => {
+                const text = prompt('Enter urgent item:') || 'Urgent task';
+                if (text.trim()) {
+                    const container = document.getElementById('urgent-items');
+                    const item = createTaskItem(text.trim(), 'high');
+                    container.appendChild(item);
+                    autoSave();
+                }
+            }, 'add urgent item');
+        }
+
+        function addWeeklyItem() {
+            safeExecute(() => {
+                const text = prompt('Enter weekly item:') || 'This week task';
+                if (text.trim()) {
+                    const container = document.getElementById('weekly-items');
+                    const item = createTaskItem(text.trim(), 'medium');
+                    container.appendChild(item);
+                    autoSave();
+                }
+            }, 'add weekly item');
+        }
+
+        function addFutureItem() {
+            safeExecute(() => {
+                const text = prompt('Enter future item:') || 'Future task';
+                if (text.trim()) {
+                    const container = document.getElementById('future-items');
+                    const item = createTaskItem(text.trim(), 'low');
+                    container.appendChild(item);
+                    autoSave();
+                }
+            }, 'add future item');
+        }
+
+        function addPersonTracking() {
+            safeExecute(() => {
+                const name = prompt('Person\'s name:');
+                const needsText = prompt('What do they need from you?');
+                const owesText = prompt('What do they owe you?');
+                
+                if (name && (needsText || owesText)) {
+                    if (needsText) {
+                        addPersonNeed(name, needsText);
+                    }
+                    if (owesText) {
+                        addPersonOwes(name, owesText);
+                    }
+                    autoSave();
+                }
+            }, 'add person tracking');
+        }
+
+        function addPersonNeed(name, need) {
+            const container = document.getElementById('people-needs');
+            const row = document.createElement('div');
+            row.className = 'form-row';
+            row.innerHTML = `
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" value="${name}" oninput="autoSave()">
+                </div>
+                <div class="form-group">
+                    <label>Needs:</label>
+                    <input type="text" value="${need}" oninput="autoSave()">
+                </div>
+                <div class="form-group small">
+                    <label>By When:</label>
+                    <input type="date" oninput="autoSave()">
+                </div>
+                <button class="delete-btn" onclick="deleteItem(this)">×</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function addPersonOwes(name, owes) {
+            const container = document.getElementById('people-owes');
+            const row = document.createElement('div');
+            row.className = 'form-row';
+            row.innerHTML = `
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" value="${name}" oninput="autoSave()">
+                </div>
+                <div class="form-group">
+                    <label>Owes Me:</label>
+                    <input type="text" value="${owes}" oninput="autoSave()">
+                </div>
+                <button class="delete-btn" onclick="deleteItem(this)">×</button>
+            `;
+            container.appendChild(row);
+        }
+
+        // Timer functions
+        function toggleTimer() {
+            safeExecute(() => {
+                if (appState.timerRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            }, 'toggle timer');
+        }
+
+        function startTimer() {
+            if (!appState.timerRunning) {
+                appState.timerRunning = true;
+                appState.timerInterval = setInterval(() => {
+                    appState.timerSeconds++;
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            if (appState.timerRunning) {
+                appState.timerRunning = false;
+                clearInterval(appState.timerInterval);
+            }
+        }
+
+        function resetTimer() {
+            appState.timerRunning = false;
+            clearInterval(appState.timerInterval);
+            appState.timerSeconds = 0;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(appState.timerSeconds / 60);
+            const seconds = appState.timerSeconds % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = display;
+            
+            const widget = document.getElementById('timerWidget');
+            widget.classList.remove('warning', 'danger');
+            
+            if (appState.timerSeconds > 3600) { // Over 1 hour
+                widget.classList.add('danger');
+                if (appState.timerSeconds % 300 === 0) { // Every 5 minutes
+                    showNotification('⏰ Meeting has been running for over an hour. Consider wrapping up!', 'warning');
+                }
+            } else if (appState.timerSeconds > 2700) { // Over 45 minutes
+                widget.classList.add('warning');
+            }
+        }
+
+        // Focus mode functions
+        function startFocusSession(minutes) {
+            safeExecute(() => {
+                appState.focusSeconds = minutes * 60;
+                appState.focusRunning = true;
+                
+                appState.focusTimerInterval = setInterval(() => {
+                    appState.focusSeconds--;
+                    updateFocusDisplay();
+                    
+                    if (appState.focusSeconds <= 0) {
+                        clearInterval(appState.focusTimerInterval);
+                        appState.focusRunning = false;
+                        showNotification('🎉 Focus session complete! Great job staying focused!', 'success');
+                        closeModal('focusModal');
+                    }
+                }, 1000);
+            }, 'start focus session');
+        }
+
+        function updateFocusDisplay() {
+            const minutes = Math.floor(appState.focusSeconds / 60);
+            const seconds = appState.focusSeconds % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('focusTimer').textContent = display;
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            safeExecute(() => {
+                document.getElementById(modalId).classList.add('show');
+            }, 'open modal');
+        }
+
+        function closeModal(modalId) {
+            safeExecute(() => {
+                document.getElementById(modalId).classList.remove('show');
+                if (modalId === 'focusModal' && appState.focusRunning) {
+                    clearInterval(appState.focusTimerInterval);
+                    appState.focusRunning = false;
+                }
+            }, 'close modal');
+        }
+
+        // Export functions
+        function exportData(format) {
+            safeExecute(() => {
+                const data = collectAllData();
+                
+                switch (format) {
+                    case 'text':
+                        exportAsText(data);
+                        break;
+                    case 'email':
+                        exportAsEmail(data);
+                        break;
+                    case 'json':
+                        exportAsJSON(data);
+                        break;
+                }
+                
+                closeModal('exportModal');
+                showSaveIndicator();
+            }, 'export data');
+        }
+
+        function exportAsText(data) {
+            const text = formatDataAsText(data);
+            downloadFile(text, `meeting-notes-${data.meetingDate || 'untitled'}.txt`, 'text/plain');
+        }
+
+        function exportAsEmail(data) {
+            const subject = `Meeting Summary: ${data.meetingTitle || 'Meeting Notes'}`;
+            const body = formatDataAsText(data, true);
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailtoLink);
+        }
+
+        function exportAsJSON(data) {
+            const jsonData = JSON.stringify(data, null, 2);
+            downloadFile(jsonData, `meeting-data-${data.meetingDate || 'untitled'}.json`, 'application/json');
+        }
+
+        function formatDataAsText(data, isEmail = false) {
+            const prefix = isEmail ? 'Hi team,\n\nHere\'s our meeting summary:\n\n' : '';
+            const suffix = isEmail ? '\n\nLet me know if I missed anything!\n\nBest regards' : `\n\nGenerated by ADHD Meeting Tracker Pro\n${new Date().toLocaleString()}`;
+            
+            return `${prefix}📋 MEETING: ${data.meetingTitle || 'Untitled Meeting'}
+📅 DATE: ${data.meetingDate} ${data.meetingTime || ''}
+
+🎯 PURPOSE:
+${data.meetingPurpose || 'No purpose specified'}
+
+🧠 BRAIN DUMP:
+${data.brainDump || 'No notes captured'}
+
+🔑 KEY DECISIONS:
+${data.keyDecisions || 'No decisions recorded'}
+
+✅ TOP COMMITMENTS:
+${data.commitments || 'No commitments made'}
+
+🚨 URGENT ACTIONS:
+${formatTaskList(data.urgentItems)}
+
+⭐ THIS WEEK:
+${formatTaskList(data.weeklyItems)}
+
+📅 FUTURE ACTIONS:
+${formatTaskList(data.futureItems)}
+
+💭 ADDITIONAL NOTES:
+${data.additionalNotes || 'No additional notes'}${suffix}`;
+        }
+
+        function formatTaskList(tasks) {
+            if (!tasks || tasks.length === 0) return 'None specified';
+            return tasks.map(task => `• ${task.text} ${task.completed ? '✓' : ''}`).join('\n');
+        }
+
+        function printData() {
+            safeExecute(() => {
+                const data = collectAllData();
+                const printContent = createPrintContent(data);
+                
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+                printWindow.focus();
+                
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+                
+                closeModal('exportModal');
+            }, 'print data');
+        }
+
+        function createPrintContent(data) {
+            return `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meeting Notes - ${data.meetingTitle}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; color: #333; }
+        h1 { color: #4facfe; border-bottom: 3px solid #4facfe; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 25px; border-left: 4px solid #4facfe; padding-left: 15px; }
+        .section { margin-bottom: 25px; page-break-inside: avoid; }
+        .highlight { background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe; }
+        .task-list { margin-left: 20px; }
+        .task-item { margin: 5px 0; }
+        .completed { text-decoration: line-through; opacity: 0.7; }
+        .priority-high { color: #dc3545; font-weight: bold; }
+        .priority-medium { color: #ffc107; font-weight: bold; }
+        .priority-low { color: #28a745; }
+        .meta-info { font-size: 0.9em; color: #666; margin-bottom: 30px; }
+        @media print { body { margin: 20px; } }
+    </style>
+</head>
+<body>
+    <h1>🧠 ${data.meetingTitle || 'Meeting Notes'}</h1>
+    <div class="meta-info">
+        📅 ${data.meetingDate} ${data.meetingTime || ''} | 
+        Template: ${data.template || 'Custom'} | 
+        Generated: ${new Date().toLocaleString()}
+    </div>
+    
+    <div class="section highlight">
+        <h2>🎯 Purpose</h2>
+        <p>${data.meetingPurpose || 'No purpose specified'}</p>
+    </div>
+    
+    <div class="section">
+        <h2>🔑 Key Decisions & Outcomes</h2>
+        <p>${data.keyDecisions || 'No decisions recorded'}</p>
+    </div>
+    
+    <div class="section highlight">
+        <h2>✅ My Top Commitments</h2>
+        <p>${data.commitments || 'No commitments made'}</p>
+    </div>
+    
+    <div class="section">
+        <h2>🚨 Urgent Actions (Do Today)</h2>
+        <div class="task-list">
+            ${formatTasksForPrint(data.urgentItems)}
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>⭐ This Week</h2>
+        <div class="task-list">
+            ${formatTasksForPrint(data.weeklyItems)}
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>📅 Future Actions</h2>
+        <div class="task-list">
+            ${formatTasksForPrint(data.futureItems)}
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>🧠 Brain Dump / Notes</h2>
+        <p>${data.brainDump || 'No notes captured'}</p>
+    </div>
+    
+    <div class="section">
+        <h2>💭 Additional Notes</h2>
+        <p>${data.additionalNotes || 'No additional notes'}</p>
+    </div>
+</body>
+</html>`;
+        }
+
+        function formatTasksForPrint(tasks) {
+            if (!tasks || tasks.length === 0) return '<p>None specified</p>';
+            return tasks.map(task => `
+                <div class="task-item ${task.completed ? 'completed' : ''} ${task.priority !== 'none' ? 'priority-' + task.priority : ''}">
+                    ${task.completed ? '✅' : '☐'} ${task.text}
+                </div>
+            `).join('');
+        }
+
+        function downloadFile(content, filename, contentType) {
+            try {
+                const blob = new Blob([content], { type: contentType });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Download failed:', error);
+                showNotification('Download failed. Please try again.', 'error');
+            }
+        }
+
+        // Progress tracking
+        function updateProgress() {
+            safeExecute(() => {
+                const requiredFields = [
+                    'meetingTitle',
+                    'meetingPurpose',
+                    'keyDecisions',
+                    'commitments'
+                ];
+                
+                let completed = 0;
+                const total = requiredFields.length + 2; // +2 for brain dump and effectiveness rating
+                
+                // Check required text fields
+                requiredFields.forEach(fieldId => {
+                    const element = document.getElementById(fieldId);
+                    if (element && element.value && element.value.trim().length > 10) {
+                        completed++;
+                    }
+                });
+                
+                // Check brain dump (content editable)
+                const brainDump = document.getElementById('brainDump');
+                if (brainDump && !brainDump.classList.contains('placeholder') && 
+                    brainDump.innerText && brainDump.innerText.trim().length > 20) {
+                    completed++;
+                }
+                
+                // Check effectiveness rating
+                const effectivenessRating = document.querySelector('#effectivenessRating .rating-button.selected');
+                if (effectivenessRating) {
+                    completed++;
+                }
+                
+                const percentage = Math.round((completed / total) * 100);
+                
+                // Update progress bar
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                
+                if (progressBar) {
+                    progressBar.style.width = percentage + '%';
+                }
+                if (progressText) {
+                    progressText.textContent = `${percentage}% Complete`;
+                }
+                
+                // Show completion celebration
+                if (percentage === 100 && completed === total) {
+                    setTimeout(() => {
+                        showNotification('🎉 Meeting notes complete! Great job capturing everything!', 'success');
+                    }, 500);
+                }
+            }, 'update progress');
+        }
+
+        // Utility functions
+        function updateWordCount(element, counterId) {
+            safeExecute(() => {
+                const text = element.value || element.innerText || '';
+                const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+                const counter = document.getElementById(counterId);
+                if (counter) {
+                    counter.textContent = `${wordCount} word${wordCount !== 1 ? 's' : ''}`;
+                }
+            }, 'update word count');
+        }
+
+        function setTodaysDate() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const now = new Date().toTimeString().slice(0, 5);
+                document.getElementById('meetingDate').value = today;
+                document.getElementById('meetingTime').value = now;
+            } catch (error) {
+                console.error('Error setting date:', error);
+            }
+        }
+
+        function clearAllFields() {
+            safeExecute(() => {
+                // Clear text inputs
+                document.querySelectorAll('input[type="text"], input[type="time"], textarea').forEach(field => {
+                    field.value = '';
+                });
+                
+                // Clear contenteditable areas
+                document.querySelectorAll('[contenteditable]').forEach(area => {
+                    area.innerHTML = area.dataset.placeholder || 'Click to add content...';
+                    area.classList.add('placeholder');
+                });
+                
+                // Clear task containers
+                document.querySelectorAll('#quick-actions, #urgent-items, #weekly-items, #future-items, #people-needs, #people-owes').forEach(container => {
+                    container.innerHTML = '';
+                });
+                
+                // Reset ratings
+                document.querySelectorAll('.rating-button').forEach(button => {
+                    button.classList.remove('selected');
+                });
+                
+                // Reset priorities
+                document.querySelectorAll('.priority-dot').forEach(dot => {
+                    dot.classList.remove('selected');
+                    if (dot.classList.contains('none')) {
+                        dot.classList.add('selected');
+                    }
+                });
+                
+                // Reset template selection
+                document.querySelectorAll('.template-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // Reset timers
+                resetTimer();
+                
+                // Set today's date
+                setTodaysDate();
+                
+                updateProgress();
+                autoSave();
+            }, 'clear all fields');
+        }
+
+        function clearAll() {
+            if (confirm('⚠️ This will clear ALL data. Are you sure? (This cannot be undone)')) {
+                clearAllFields();
+                showNotification('🗑️ All data cleared. Starting fresh!', 'info');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 9999;
+                max-width: 300px;
+                word-wrap: break-word;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            switch (type) {
+                case 'success':
+                    notification.style.background = '#28a745';
+                    break;
+                case 'warning':
+                    notification.style.background = '#ffc107';
+                    notification.style.color = '#333';
+                    break;
+                case 'error':
+                    notification.style.background = '#dc3545';
+                    break;
+                default:
+                    notification.style.background = '#4facfe';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Event listeners and initialization
+        function initializeApp() {
+            safeExecute(() => {
+                console.log('🧠 ADHD Meeting Tracker Pro v2.0 - Initializing...');
+                
+                // Set initial date
+                setTodaysDate();
+                
+                // Initialize auto-save
+                appState.autoSaveInterval = setInterval(() => {
+                    if (appState.hasUnsavedChanges) {
+                        autoSave();
+                    }
+                }, 30000); // Auto-save every 30 seconds
+                
+                // Initialize drag and drop
+                const dropContainers = document.querySelectorAll('#quick-actions, #urgent-items, #weekly-items, #future-items');
+                dropContainers.forEach(container => {
+                    container.addEventListener('dragover', allowDrop);
+                    container.addEventListener('drop', drop);
+                });
+                
+                // Add keyboard shortcuts
+                document.addEventListener('keydown', handleKeyboardShortcuts);
+                
+                // Add click outside to close modals
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) {
+                        closeModal(e.target.id);
+                    }
+                });
+                
+                // Initialize progress tracking
+                updateProgress();
+                
+                // Check for PWA install prompt
+                setTimeout(showInstallPrompt, 2000);
+                
+                // Add visual feedback for sections
+                setTimeout(() => {
+                    document.querySelectorAll('.section').forEach((section, index) => {
+                        section.style.animationDelay = `${index * 0.1}s`;
+                        section.classList.add('fade-in');
+                    });
+                }, 100);
+                
+                console.log('✅ App initialized successfully!');
+            }, 'app initialization');
+        }
+
+        function handleKeyboardShortcuts(e) {
+            // Ctrl/Cmd + S for save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                manualSave();
+            }
+            
+            // Ctrl/Cmd + F for focus mode
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                openModal('focusModal');
+            }
+            
+            // Ctrl/Cmd + E for export
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                openModal('exportModal');
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.show').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+            
+            // Space to toggle timer (when not in input)
+            if (e.key === ' ' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName) && !e.target.contentEditable) {
+                e.preventDefault();
+                toggleTimer();
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        // Handle page unload
+        window.addEventListener('beforeunload', (e) => {
+            if (appState.hasUnsavedChanges) {
+                const message = 'You have unsaved changes. Are you sure you want to leave?';
+                e.returnValue = message;
+                return message;
+            }
+        });
+
+        // Handle visibility change (for mobile)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Save when app goes to background
+                if (appState.hasUnsavedChanges) {
+                    autoSave();
+                }
+            }
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            
+            .notification {
+                animation: slideIn 0.3s ease;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Export functions to global scope for onclick handlers
+        window.loadSmartTemplate = loadSmartTemplate;
+        window.toggleCheck = toggleCheck;
+        window.selectRating = selectRating;
+        window.setSectionPriority = setSectionPriority;
+        window.setTaskPriority = setTaskPriority;
+        window.startEditing = startEditing;
+        window.deleteItem = deleteItem;
+        window.addQuickAction = addQuickAction;
+        window.addUrgentItem = addUrgentItem;
+        window.addWeeklyItem = addWeeklyItem;
+        window.addFutureItem = addFutureItem;
+        window.addPersonTracking = addPersonTracking;
+        window.toggleTimer = toggleTimer;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.startFocusSession = startFocusSession;
+        window.exportData = exportData;
+        window.printData = printData;
+        window.manualSave = manualSave;
+        window.clearAll = clearAll;
+        window.autoSave = autoSave;
+        window.updateProgress = updateProgress;
+        window.updateWordCount = updateWordCount;
+        window.handleError = handleError;
+        window.dismissInstallPrompt = dismissInstallPrompt;
+    </script>
+</body>
+</html>
