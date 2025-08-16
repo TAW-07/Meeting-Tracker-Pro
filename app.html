@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>ADHD Meeting Brain Dump & Action Tracker Pro</title>
     
+    <a href="/"class="btn-primary">Back to Landing Page</a>
+    
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#4facfe">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -958,8 +960,9 @@
     
     <div class="container">
         <div class="header">
-            <h1>🧠 Meeting Brain Dump & Action Tracker Pro</h1>
-            <p class="subtitle">Smart capture for ADHD minds</p>
+            <h1>🧠 Meeting Brain Dump & Action Tracker </h1>
+            <p class="subtitle">'Turn scattered thoughts into clarity'</p>
+</p>
             <div class="progress-container">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
@@ -974,7 +977,8 @@
                     <h2>Smart Templates</h2>
                 </div>
                 <div class="feature-highlight">
-                    <strong>✨ New:</strong> AI-powered templates with pre-filled content to get you started in seconds!
+                    <strong>✨ New:</strong>
+                    Templates with pre-filled content to get you started in seconds!
                 </div>
                 
                 <!-- Template Cards -->
@@ -983,7 +987,6 @@
                         <div class="template-title">🎯 Daily Standup</div>
                         <div class="template-description">Team sync with yesterday/today/blockers format</div>
                         <div class="template-tags">
-                            <span class="template-tag">15 min</span>
                             <span class="template-tag">Team</span>
                         </div>
                     </div>
@@ -992,7 +995,6 @@
                         <div class="template-title">📊 Client Presentation</div>
                         <div class="template-description">Progress review, feedback, and next steps</div>
                         <div class="template-tags">
-                            <span class="template-tag">45 min</span>
                             <span class="template-tag">Client</span>
                         </div>
                     </div>
@@ -1001,7 +1003,6 @@
                         <div class="template-title">💡 Brainstorm Session</div>
                         <div class="template-description">Creative ideation with structured capture</div>
                         <div class="template-tags">
-                            <span class="template-tag">60 min</span>
                             <span class="template-tag">Creative</span>
                         </div>
                     </div>
@@ -1010,7 +1011,6 @@
                         <div class="template-title">👤 1-on-1 Meeting</div>
                         <div class="template-description">Career development and feedback session</div>
                         <div class="template-tags">
-                            <span class="template-tag">30 min</span>
                             <span class="template-tag">Personal</span>
                         </div>
                     </div>
@@ -1019,7 +1019,6 @@
                         <div class="template-title">📋 Project Planning</div>
                         <div class="template-description">Scope, timeline, and resource planning</div>
                         <div class="template-tags">
-                            <span class="template-tag">90 min</span>
                             <span class="template-tag">Planning</span>
                         </div>
                     </div>
@@ -1066,9 +1065,26 @@
                         <div class="word-counter" id="wordCount1">0 words</div>
                     </div>
                 </div>
-
+                
+                <h3>Key People & Their Roles:</h3>
+                <div id="peopleContainer">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" placeholder="Person's name" oninput="autoSave(); updateProgress()">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" placeholder="Their role/title" oninput="autoSave(); updateProgress()">
+                        </div>
+                        <button class="delete-btn" onclick="deleteItem(this)">×</button>
+                    </div>
+                </div>
+                
+                <button class="add-btn" onclick="addPerson()">👥 Add Person</button>
+            </div>
+            
                 <div class="form-group">
-                    <label>My Energy Level:</label>
+                    <label>My Energy Level Right Now:</label>
+            
                     <div class="rating-scale">
                         <span>😴</span>
                         <div class="rating-buttons" id="energyRating">
@@ -1116,6 +1132,8 @@
                     <span class="section-icon">⚡</span>
                     <h2>Quick Actions</h2>
                 </div>
+<div class="form-group">
+    <label>Pre fill and Check off as things come up!</label>
                 <div id="quick-actions">
                     <!-- Actions will be added here -->
                 </div>
@@ -1821,6 +1839,22 @@
         }
 
         // Add item functions
+        function addPerson() {
+            const container = document.getElementById('peopleContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'form-row';
+            newRow.innerHTML = `
+                <div class="form-group">
+                    <input type="text" placeholder="Person's name" oninput="autoSave(); updateProgress()">
+                </div>
+                <div class="form-group">
+                    <input type="text" placeholder="Their role/title" oninput="autoSave(); updateProgress()">
+                </div>
+                <button class="delete-btn" onclick="deleteItem(this)">×</button>
+            `;
+            container.appendChild(newRow);
+        }
+
         function addQuickAction() {
             safeExecute(() => {
                 const text = prompt('Enter quick action:') || 'New action item';
